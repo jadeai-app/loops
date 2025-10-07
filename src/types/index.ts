@@ -1,4 +1,6 @@
-import type { GeoPoint, Timestamp } from 'firebase/firestore';
+// Use the Admin SDK types for canonical data structures.
+// The client SDK is compatible with these types.
+import type { GeoPoint, Timestamp } from 'firebase-admin/firestore';
 
 /**
  * Represents the public profile of a user.

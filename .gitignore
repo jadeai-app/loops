@@ -1,1 +1,38 @@
-node_modules
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Next.js build output
+/.next/
+/out/
+
+# Vercel
+.vercel
+
+# Test results
+/coverage
+/reports
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+*.log
+emulators.log
+
+# Local environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Jules scratchpad
+/jules-scratch/
+
+# Cloud Functions build output
+/functions/lib
