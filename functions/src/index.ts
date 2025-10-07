@@ -1,16 +1,11 @@
-import { initializeApp } from "firebase-admin/app";
+/**
+ * Main entry point for all Cloud Functions.
+ *
+ * This file should export all the functions that are to be deployed.
+ * The Firebase CLI will read this file to determine which functions to deploy.
+ */
 
-// Initialize the Firebase Admin SDK.
-// This should be done once per function deployment.
-initializeApp();
+import { triggerSOS } from "./http/sos/triggerSOS";
 
-// Export all the functions that should be deployed.
-
-// HTTP Triggers
-export { triggerSOS } from "./http/sos/triggerSOS";
-
-// Pub/Sub Triggers
-export { notifySOS } from "./pubsub/notifySOS";
-
-// Note: The core rate-limiting logic is consolidated into `triggerSOS` for efficiency.
-// Other asynchronous triggers are listed below.
+// Export all functions for deployment
+export { triggerSOS };

@@ -1,4 +1,5 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     // Helper functions for clarity
@@ -8,30 +9,26 @@ service cloud.firestore {
     function isOwnerOfProfile(profileId) {
       return isSignedIn() && request.auth.uid == profileId;
     }
-    function isOwnerOfEvent(eventId) {
-        return isSignedIn() && request.auth.uid == get(/databases/$(database)/documents/sos_events/$(eventId)).data.user_uid;
-    }
-    function getCircleIdForEvent(eventId) {
-      return get(/databases/$(database)/documents/sos_events/$(eventId)).data.circle_id;
-    }
-    function isMemberOfCircle(circleId) {
-      return isSignedIn() && exists(/databases/$(database)/documents/circles/$(circleId)/members/$(request.auth.uid));
-    }
-    function isMemberOfCircleForEvent(eventId) {
-      return isMemberOfCircle(getCircleIdForEvent(eventId));
-    }
 
     // A user can only read and write their own profile
     match /profiles/{profileId} {
       allow read, write: if isOwnerOfProfile(profileId);
     }
 
-    // A user can create an SOS event. Only the owner or a circle member can read it.
-    // Only the owner can update it to 'resolved'.
+    // Rules for SOS events
     match /sos_events/{eventId} {
+      // Any signed-in user can create an SOS event.
+      // The user_uid will be set by the Cloud Function.
       allow create: if isSignedIn();
-      allow read: if isOwnerOfEvent(eventId) || isMemberOfCircleForEvent(eventId);
-      allow update: if isOwnerOfEvent(eventId) && request.resource.data.status == 'resolved';
+
+      // An event can be read by its owner or by a member of the circle it was sent to.
+      allow read: if isOwner(resource.data.user_uid) ||
+                   exists(/databases/$(database)/documents/circles/$(resource.data.circle_id)/members/$(request.auth.uid));
+
+      // An event can only be updated by its owner, and only to mark it as 'resolved'.
+      allow update: if isOwner(resource.data.user_uid) &&
+                     request.resource.data.status == 'resolved' &&
+                     resource.data.status == 'active';
     }
 
     // A user can manage their own push subscriptions
