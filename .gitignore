@@ -36,3 +36,5 @@ emulators.log
 
 # Cloud Functions build output
 /functions/lib
+/functions/.secret.local
+sendgrid.env

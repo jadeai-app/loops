@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { startPocketDialDetection, stopPocketDialDetection, isPocketDialRisk } from '../../lib/security/abuseControls';
+import { isIOS, isPWA } from '../../lib/utils/platform';
 
 // Define the props for the component
 interface SOSButtonProps {
@@ -59,6 +60,20 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
       setProgress(100);
       vibrate([200, 100, 200]); // Success vibration
       onActivate();
+
+      // For iOS PWAs, push notifications can be unreliable.
+      // Trigger a local notification as a backup reminder for the sender.
+      if (isIOS() && isPWA()) {
+        console.log('iOS PWA detected. Triggering local backup notification.');
+        // Ensure we have permission before trying to show a notification.
+        if (Notification.permission === 'granted') {
+          new Notification('SOS Activated - Reminder', {
+            body: 'Your alert has been sent. For the most reliable updates, please keep Loops open in the background.',
+            icon: '/favicon.ico', // Optional: adds an icon
+          });
+        }
+      }
+
       if (intervalRef.current) clearInterval(intervalRef.current);
     }, holdTime);
   };

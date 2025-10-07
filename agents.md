@@ -326,3 +326,71 @@ These KPIs are our North Star metrics. They are directly tied to our core value 
 ### **IX. Conclusion**
 
 This PRD is a complete, end-to-end blueprint for a life-critical application. It transcends a simple feature list by embedding security, performance, accessibility, and ethical considerations into its very core. By leveraging the Firebase platform to its fullest potential—using Firestore's offline capabilities, FCM's reliability, and 2nd Gen Functions' performance guarantees—we have a clear, feasible, and robust path to building a sovereign alert system that can be trusted in the most critical moments. This document, and its accompanying repository structure, provides everything an engineering team needs to ship a flawless, production-ready MVP that establishes Loops as a foundational piece of digital public infrastructure. The level of detail, from the data model to the CI/CD gates, ensures there is no ambiguity in what needs to be built, how it should be built, and how its success will be measured. This is not just a plan; it is a commitment to building a product that can save lives.
+
+---
+
+### **X. Phase 2: Hardening, Compliance, and Production Readiness**
+
+This phase addresses critical production-readiness requirements, focusing on security, legal compliance, and operational observability. These are non-negotiable for a public launch.
+
+#### **1. Implement Secure Secret Management**
+- **Requirement:** Revoke the current SendGrid API key and create a new one. Implement secure secret management for the new key using Firebase 2nd-gen Functions Secrets.
+- **Implementation Details:**
+    - Run `firebase functions:secrets:set SENDGRID_API_KEY` to store the new key.
+    - Access the secret in `/functions/src/lib/emailClient.ts` via `process.env.SENDGRID_API_KEY`.
+    - Update `functions/.secret.local` for local emulator development and ensure this file is in `.gitignore`.
+    - Remove all hardcoded or `.env` references to the old API key from the codebase.
+
+#### **2. Address iOS PWA Notification Limitations**
+- **Requirement:** Enhance the iOS PWA experience to account for platform-specific notification limitations, where reliability is inconsistent and lock screen alerts are not supported.
+- **Implementation Details:**
+    - In `FCMProvider.tsx`, add a check: if `isIOS() && isPWA()`, after a successful FCM send, also trigger a **local notification** on the sender's device as a backup reminder.
+    - Update the iOS installation prompt modal to explicitly state: "For the most reliable alerts, please keep Loops open in the background.”
+
+#### **3. Build GDPR/CCPA Right-to-Be-Forgotten Workflow**
+- **Requirement:** Implement a user data deletion workflow to comply with GDPR's "right to erasure" and CCPA.
+- **Implementation Details:**
+    - Create a new Cloud Function `deleteUserData` (HTTP, authenticated).
+    - On request, the function must:
+        a) Delete all documents in collections where `user_uid` is the key (`profiles`, `user_limits`, `push_subscriptions`).
+        b) Anonymize (not delete) `sos_events` and `notification_logs` by replacing `user_uid` with a secure hash.
+        c) Remove the user from all `circle_members` subcollections.
+    - Log the deletion request in a separate, secure audit trail collection.
+
+#### **4. Harden WebRTC Signaling Server**
+- **Requirement:** Secure the WebRTC signaling server against unauthorized access and replay attacks.
+- **Implementation Details:**
+    - All signaling messages (e.g., `/api/webrtc/offer`, `/api/webrtc/answer`) must be authenticated using the user's Firebase ID token.
+    - Store offers/answers in Firestore with a TTL of 60 seconds to prevent replay attacks.
+    - Enforce TLS (HTTPS or WSS) for all signaling server communication.
+    - Before processing an offer, validate that the `recipientId` is a member of the sender's safety circle.
+
+#### **5. Define and Enforce Data Retention Policy**
+- **Requirement:** Implement an automated data retention policy to align with data minimization principles.
+- **Implementation Details:**
+    - Add TTL (Time-To-Live) policies to the following Firestore collections:
+        - `sos_events`: 30 days
+        - `notification_logs`: 7 days
+        - `webrtc_signals`: 5 minutes
+    - Document this policy in a new `PRIVACY.md` file in the repository root.
+
+#### **6. Add Legal Compliance Artifacts**
+- **Requirement:** Generate and integrate required legal documents for launch.
+- **Implementation Details:**
+    - Create `PRIVACY_POLICY.md` detailing data collection, use of FCM, and the right to deletion.
+    - Create `TERMS_OF_SERVICE.md` with a clear disclaimer: “Loops is not a replacement for 911 or other emergency services.”
+    - Add links to both documents in the onboarding flow (Step 2) and the application footer.
+
+#### **7. Implement Production Observability**
+- **Requirement:** Add structured logging and error tracking for production monitoring.
+- **Implementation Details:**
+    - In all Cloud Functions, replace `console.log` with structured JSON logging (e.g., `logger.info({ eventId, userId }, "SOS triggered")`).
+    - Integrate a third-party error tracking service like Sentry for the Next.js frontend.
+    - Create a Cloud Monitoring alert that triggers if the `triggerSOS` function’s 95th percentile latency exceeds 2.5 seconds.
+
+#### **8. Finalize MFA Implementation Plan**
+- **Requirement:** Clarify and enforce the Multi-Factor Authentication (MFA) flow to meet security KPIs.
+- **Implementation Details:**
+    - Use Firebase Authentication’s built-in TOTP MFA provider.
+    - In the onboarding flow (Step 2), if a user skips MFA setup, store `mfa_enabled: false` in their profile.
+    - Prompt the user to complete MFA setup on every subsequent application start until they enable it. This is designed to achieve the KPI: "Onboarding Completion Rate (with MFA setup) ≥ 92%".
