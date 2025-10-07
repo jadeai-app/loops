@@ -1,6 +1,6 @@
 import { https, logger } from "firebase-functions/v2";
 import { initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 
 // Initialize Firebase Admin SDK
@@ -38,6 +38,10 @@ export const triggerSOS = https.onCall(async (request) => {
   // 3. Create the SOS event in Firestore
   // - Get the user's default circle.
   // - Create a new document in the `sos_events` collection.
+  const now = Timestamp.now();
+  // 30 days in seconds (30 * 24 * 60 * 60)
+  const expireAt = new Timestamp(now.seconds + 2592000, now.nanoseconds);
+
   const eventData = {
     user_uid: uid,
     circle_id: "default_circle_id", // TODO: Fetch the user's actual circle ID
@@ -45,7 +49,8 @@ export const triggerSOS = https.onCall(async (request) => {
     location: request.data.location || null, // Expecting location data from the client
     accuracy_meters: request.data.accuracy_meters || null,
     trigger_method: "hold", // TODO: Determine from client data
-    created_at: new Date(),
+    created_at: now,
+    expireAt: expireAt,
   };
 
   const eventRef = await db.collection("sos_events").add(eventData);
