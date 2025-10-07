@@ -63,6 +63,7 @@ export interface SosEvent {
   created_at: Timestamp;
   resolved_at?: Timestamp;
   resolution_reason?: 'false_alarm' | 'all_ok' | 'emergency_handled';
+  expireAt?: Timestamp;
 }
 
 /**
@@ -98,4 +99,5 @@ export interface NotificationLog {
   status: 'sent' | 'delivered' | 'failed';
   timestamp: Timestamp;
   error_message?: string;
+  expireAt?: Timestamp;
 }

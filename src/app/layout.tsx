@@ -24,9 +24,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const bodyStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    margin: 0,
+  };
+
+  const mainStyle: React.CSSProperties = {
+    flex: '1 0 auto',
+  };
+
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className} style={bodyStyle}>
         <AuthProvider>
           <FCMProvider>
             <AccessibilityProvider>

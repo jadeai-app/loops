@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import SOSButton from '../../../components/ui/SOSButton';
+import IosInstallPrompt from '../../../components/ui/IosInstallPrompt';
 import { triggerSOSCallable } from '../../../lib/firebase/clientApp';
 import { useAuth } from '../providers/AuthProvider';
+import { isIOS, isPWA } from '../../../lib/utils/platform';
 
 /**
  * The main SOS activation page. This page is protected by the AuthLayout.
@@ -15,6 +17,7 @@ export default function SosPage() {
   const [isActivating, setIsActivating] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [circleId, setCircleId] = useState<string | null>(null);
+  const [showIosInstallPrompt, setShowIosInstallPrompt] = useState(false);
 
   // Effect to fetch the user's primary circle ID
   useEffect(() => {
@@ -56,6 +59,10 @@ export default function SosPage() {
 
           if (result.data.status === 'success') {
             setStatusMessage(`SOS successfully sent! Event ID: ${result.data.eventId}`);
+            // After a successful SOS, check if we should prompt the user to install the PWA.
+            if (isIOS() && !isPWA()) {
+              setShowIosInstallPrompt(true);
+            }
           } else {
             throw new Error('SOS trigger failed on the server.');
           }
@@ -102,6 +109,7 @@ export default function SosPage() {
            You must set up a safety circle before you can send an SOS.
          </p>
       )}
+      {showIosInstallPrompt && <IosInstallPrompt onClose={() => setShowIosInstallPrompt(false)} />}
     </main>
   );
 }

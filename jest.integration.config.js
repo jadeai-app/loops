@@ -6,4 +6,8 @@ module.exports = {
   testMatch: ['**/tests/integration/**/*.test.ts'],
   // Set a longer timeout for integration tests as they interact with emulators
   testTimeout: 30000,
+  // Allow transpiling of specific node_modules packages that use ESM
+  transformIgnorePatterns: [
+    '/node_modules/(?!jose)/',
+  ],
 };

@@ -1,6 +1,6 @@
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import * as logger from 'firebase-functions/logger';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 import { SosEvent, UserProfile, EmergencyContact, NotificationLog } from '../../../src/types';
 import { sendEmergencyEmail } from '../lib/emailClient';
@@ -97,12 +97,17 @@ async function logNotification(
   status: 'sent' | 'delivered' | 'failed',
   errorMessage?: string
 ) {
+  const now = Timestamp.now();
+  // 7 days in seconds (7 * 24 * 60 * 60)
+  const expireAt = new Timestamp(now.seconds + 604800, now.nanoseconds);
+
   const logEntry: NotificationLog = {
     event_id: eventId,
     contact_id: contactId,
     channel,
     status,
-    timestamp: new Date(), // Using JS Date, Firestore will convert to Timestamp
+    timestamp: now,
+    expireAt: expireAt,
   };
   if (errorMessage) {
     logEntry.error_message = errorMessage;
