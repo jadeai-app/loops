@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions for clarity
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isMemberOfCircleForEvent(eventId) {
+      let circleId = get(/databases/$(database)/documents/sos_events/$(eventId)).data.circle_id;
+      return isSignedIn() && exists(/databases/$(database)/documents/circles/$(circleId)/members/$(request.auth.uid));
+    }
+
+    // A user can only read and write their own profile
+    match /profiles/{profileId} {
+      allow read, write: if isOwner(profileId);
+    }
+
+    // A user can create an SOS event. Only the owner or a circle member can read it.
+    // Only the owner can update it to 'resolved'.
+    match /sos_events/{eventId} {
+      allow create: if isSignedIn();
+      allow read: if isOwner(get(/databases/$(database)/documents/sos_events/$(eventId)).data.user_uid) || isMemberOfCircleForEvent(eventId);
+      allow update: if isOwner(get(/databases/$(database)/documents/sos_events/$(eventId)).data.user_uid) && request.resource.data.status == 'resolved';
+    }
+
+    // A user can manage their own push subscriptions
+    match /push_subscriptions/{subId} {
+      allow read, write: if isOwner(resource.data.user_uid);
+    }
+
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

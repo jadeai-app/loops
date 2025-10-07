@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "loops-mvp-prod",
+    "staging": "loops-mvp-staging"
+  }
+}
