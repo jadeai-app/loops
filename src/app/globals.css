@@ -2,63 +2,124 @@
  * Loops - Global Styles and Accessibility Base
  *
  * This file establishes the foundational styles for the application, with a
- * strong emphasis on meeting WCAG 2.1 AAA standards.
+ * strong emphasis on meeting WCAG 2.1 AAA standards and creating a modern,
+ * clean, and trustworthy aesthetic.
  */
 
 :root {
   /*
-   * COLOR PALETTE
-   *
-   * We define a high-contrast color palette to ensure readability.
-   * --background-start: A light, off-white background.
-   * --background-end: A slightly darker shade for gradients or depth.
-   * --foreground: A very dark color for text, ensuring a contrast ratio
-   *   of at least 7:1 against the background.
-   * --primary: A distinct color for interactive elements (buttons, links).
-   * --primary-foreground: Text color for use on primary-colored backgrounds.
-   * --focus-ring: A highly visible color for focus indicators.
+   * MODERN COLOR PALETTE
+   * A professional and accessible color system for a safety-focused application.
    */
-  --background-start: #F8F8F8;
-  --background-end: #F0F0F0;
-  --foreground: #1A1A1A; /* AAA compliant on #F8F8F8 (16.85:1) */
-  --primary: #005A9C;    /* AAA compliant on #F8F8F8 (7.25:1) */
-  --primary-foreground: #FFFFFF;
-  --focus-ring: #0078D4;
+  --background: #f9fafb; /* Off-white, very light gray */
+  --foreground: #111827; /* Very dark gray, almost black */
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+
+  --primary: #2563eb; /* A strong, trustworthy blue */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f3f4f6; /* Light gray for secondary elements */
+  --secondary-foreground: #1f2937;
+
+  --accent: #d1d5db; /* A subtle gray for accents */
+  --accent-foreground: #111827;
+
+  --destructive: #dc2626; /* A clear, alarming red */
+  --destructive-foreground: #ffffff;
+
+  --border: #e5e7eb; /* Light gray for borders */
+  --ring: #3b82f6; /* A lighter blue for focus rings */
+
+  --radius: 0.5rem;
+}
+
+/* Apply a dark mode theme if the user prefers it */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #030712; /* Very dark blue/gray */
+    --foreground: #f9fafb;
+    --card: #111827;
+    --card-foreground: var(--foreground);
+
+    --primary: #3b82f6; /* A slightly lighter blue for dark mode */
+    --primary-foreground: #ffffff;
+
+    --secondary: #1f2937;
+    --secondary-foreground: #f9fafb;
+
+    --accent: #374151;
+    --accent-foreground: #f9fafb;
+
+    --destructive: #ef4444; /* A brighter red for dark mode */
+    --destructive-foreground: #ffffff;
+
+    --border: #374151; /* Darker gray for borders */
+    --ring: #60a5fa;
+  }
+}
+
+
+/*
+ * GLOBAL STYLES & BOX MODEL
+ * Establishes a consistent foundation for all elements.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  /* Add a subtle transition to all color and background changes */
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   color: var(--foreground);
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      var(--background-end)
-    )
-    var(--background-start);
+  background-color: var(--background);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif; /* Ensuring Inter is the base font */
+}
+
+/*
+ * TYPOGRAPHY
+ * Defines a clear and readable hierarchy for text.
+ */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 2.25rem; } /* 36px */
+h2 { font-size: 1.875rem; } /* 30px */
+h3 { font-size: 1.5rem; } /* 24px */
+p, li, a {
+  line-height: 1.6;
+  font-size: 1rem; /* 16px */
 }
 
 /*
  * ACCESSIBILITY - FOCUS INDICATORS
- *
  * All interactive elements MUST have a clear, visible focus indicator.
- * This ensures that keyboard users can easily navigate the application.
- * We use a 2px solid outline with a distinct color.
  */
-a:focus,
-button:focus,
-input:focus,
-select:focus,
-textarea:focus,
-[tabindex]:not([tabindex="-1"]):focus {
-  outline: 2px solid var(--focus-ring);
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 3px solid var(--ring);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.3);
+  box-shadow: none; /* Remove the default box-shadow to prefer the cleaner outline */
 }
 
 /*
  * ACCESSIBILITY - REDUCED MOTION
- *
- * Respects user preferences for reduced motion. Any animations or
- * transitions should be disabled if the user has this setting enabled.
+ * Respects user preferences for reduced motion.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
