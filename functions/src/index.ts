@@ -1,11 +1,11 @@
 /**
- * Import and export all your functions here.
+ * Main entry point for all Cloud Functions.
  *
- * The exported object will be deployed to Firebase Cloud Functions.
+ * This file should export all the functions that are to be deployed.
+ * The Firebase CLI will read this file to determine which functions to deploy.
  */
 
 import { triggerSOS } from "./http/sos/triggerSOS";
 
-export {
-    triggerSOS
-};
+// Export all functions for deployment
+export { triggerSOS };
