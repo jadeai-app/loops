@@ -1,8 +1,8 @@
 import { https, logger } from "firebase-functions/v2";
-import { db } from "../../lib/firebaseAdmin";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { PubSub } from "@google-cloud/pubsub";
-import { FieldValue } from "firebase-admin/firestore";
 
+const db = getFirestore();
 const pubSubClient = new PubSub();
 const SOS_TRIGGERED_TOPIC = 'sos-triggered';
 

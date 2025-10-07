@@ -10,4 +10,6 @@ module.exports = {
   transformIgnorePatterns: [
     '/node_modules/(?!jose)/',
   ],
+  // A setup file to run before each integration test file
+  setupFilesAfterEnv: ['<rootDir>/jest.integration.setup.js'],
 };

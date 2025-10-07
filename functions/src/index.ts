@@ -5,8 +5,25 @@
  * The Firebase CLI will read this file to determine which functions to deploy.
  */
 
-import { triggerSOS } from "./http/sos/triggerSOS";
-import { enforceAbuseControls } from "./triggers/enforceAbuseControls";
+// --- Core SOS Functions ---
+import { triggerSOS } from './http/sos/triggerSOS';
+import { enforceAbuseControls } from './triggers/enforceAbuseControls';
+import { notifySOS } from './pubsub/notifySOS';
+import { onSosEventUpdate } from './triggers/onSosEventUpdate';
 
-// Export all functions for deployment
-export { triggerSOS, enforceAbuseControls };
+// --- User Lifecycle & Invitation Functions ---
+import { onUserProfileCreate } from './triggers/onUserCreate';
+import { sendCircleInvite } from './http/circles/sendInvite';
+
+// Export all functions for deployment, grouped by feature
+export {
+  // SOS and Event Handling
+  triggerSOS,
+  enforceAbuseControls,
+  notifySOS,
+  onSosEventUpdate,
+
+  // User Onboarding and Invitations
+  onUserProfileCreate,
+  sendCircleInvite,
+};

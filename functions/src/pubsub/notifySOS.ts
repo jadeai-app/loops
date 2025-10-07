@@ -3,7 +3,7 @@ import * as logger from 'firebase-functions/logger';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 import { SosEvent, UserProfile, EmergencyContact, NotificationLog } from '../../../src/types';
-import { sendEmergencyEmail } from '../lib/emailClient';
+import { sendSosAlertEmail } from '../lib/emailClient';
 
 const db = getFirestore();
 const SOS_TRIGGERED_TOPIC = 'sos-triggered';
@@ -65,9 +65,7 @@ export const notifySOS = onMessagePublished(SOS_TRIGGERED_TOPIC, async (event) =
       // --- Tier 3: Email Fallback ---
       if (contact.email) {
         try {
-          await sendEmergencyEmail({
-            to: contact.email,
-            from: 'noreply@loops.app', // This should be a configured, verified sender
+          await sendSosAlertEmail(contact.email, {
             userName,
             location,
             timestamp: created_at,
