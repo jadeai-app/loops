@@ -1,0 +1,191 @@
+/*
+ * MarketingPage.module.css
+ *
+ * Styles for the main marketing/landing page, designed to be clean,
+ * professional, and compelling for new users.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+}
+
+.section {
+  width: 100%;
+  padding: 4rem 1rem;
+}
+
+.section.secondary {
+  background-color: var(--secondary);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.hero {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.heroTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+@media (min-width: 768px) {
+  .heroTitle {
+    font-size: 3.5rem;
+  }
+}
+
+.heroDescription {
+  max-width: 600px;
+  font-size: 1.125rem;
+  color: var(--accent-foreground);
+}
+
+.heroButtons {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 400px) {
+  .heroButtons {
+    flex-direction: row;
+  }
+}
+
+.heroImageContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroImage {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: var(--radius);
+  background-color: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-foreground);
+  font-size: 1.25rem;
+  aspect-ratio: 16 / 9;
+}
+
+.features {
+  text-align: center;
+}
+
+.featuresHeader {
+  margin-bottom: 3rem;
+}
+
+.tagline {
+  display: inline-block;
+  background-color: var(--background);
+  color: var(--primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.featuresGrid {
+  display: grid;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.featureCard {
+  background-color: var(--card);
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.featureCard h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.cta {
+  text-align: center;
+}
+
+.ctaButton {
+  margin-top: 1.5rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.buttonPrimary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.buttonPrimary:hover {
+  opacity: 0.9;
+}
+
+.buttonOutline {
+  background-color: transparent;
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.buttonOutline:hover {
+  background-color: var(--secondary);
+}

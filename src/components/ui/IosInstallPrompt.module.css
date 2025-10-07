@@ -1,0 +1,132 @@
+/*
+ * IosInstallPrompt.module.css
+ *
+ * Styles for the iOS PWA installation prompt, designed to be a clear,
+ * helpful, and visually appealing modal dialog.
+ */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 450px;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  z-index: 50;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--accent-foreground);
+}
+
+.closeButton:hover {
+  color: var(--foreground);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.description {
+    color: var(--accent-foreground);
+}
+
+.importantNote {
+  background-color: var(--destructive-bg, #fee2e2);
+  border: 1px solid var(--destructive);
+  color: var(--destructive-fg, #991b1b);
+  padding: 1rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+    .importantNote {
+        background-color: var(--destructive-bg, #3f1212);
+        color: var(--destructive-fg, #fca5a5);
+    }
+}
+
+.stepsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: 1px solid transparent;
+  width: 100%;
+  margin-top: 1rem;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.button:hover {
+    opacity: 0.9;
+}

@@ -1,14 +1,11 @@
 const mockGet = jest.fn();
 const mockAdd = jest.fn();
-const mockSet = jest.fn();
-
 const mockCollection = jest.fn(() => ({
   where: jest.fn().mockReturnThis(),
   limit: jest.fn().mockReturnThis(),
   get: mockGet,
   doc: jest.fn().mockReturnThis(),
   add: mockAdd,
-  set: mockSet,
 }));
 
 const firestore = () => ({
@@ -23,10 +20,9 @@ module.exports = {
   apps: [],
   initializeApp: jest.fn(),
   firestore,
-  auth: () => jest.fn(),
-  messaging: () => jest.fn(),
+  auth: () => jest.fn(), // Add mock for auth
+  messaging: () => jest.fn(), // Add mock for messaging
   // Export mock implementations so they can be controlled from tests
   __mockGet: mockGet,
   __mockAdd: mockAdd,
-  __mockSet: mockSet,
 };

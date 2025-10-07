@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { startPocketDialDetection, stopPocketDialDetection, isPocketDialRisk } from '../../lib/security/abuseControls';
 import { isIOS, isPWA } from '../../lib/utils/platform';
+import styles from './SOSButton.module.css';
 
 // Define the props for the component
 interface SOSButtonProps {
@@ -35,18 +36,16 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
     setSosState('holding');
     setStatusText('Activating...');
     setProgress(0);
-    vibrate(50); // Initial light vibration
+    vibrate(50);
 
-    // Interval to update the progress bar
+    const progressInterval = holdTime / 100;
     intervalRef.current = setInterval(() => {
-      setProgress(p => p + 10);
-    }, holdTime / 100);
+      setProgress(p => p + 1);
+    }, progressInterval);
 
-    // Haptic pulses at 1s and 2s
     setTimeout(() => vibrate(100), 1000);
     setTimeout(() => vibrate(100), 2000);
 
-    // Main timer to activate the SOS
     timerRef.current = setTimeout(() => {
       if (isPocketDialRisk()) {
         console.warn('SOS activation canceled due to high pocket-dial risk.');
@@ -58,18 +57,15 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
       setSosState('activated');
       setStatusText('SOS Activated!');
       setProgress(100);
-      vibrate([200, 100, 200]); // Success vibration
+      vibrate([200, 100, 200]);
       onActivate();
 
-      // For iOS PWAs, push notifications can be unreliable.
-      // Trigger a local notification as a backup reminder for the sender.
       if (isIOS() && isPWA()) {
         console.log('iOS PWA detected. Triggering local backup notification.');
-        // Ensure we have permission before trying to show a notification.
         if (Notification.permission === 'granted') {
           new Notification('SOS Activated - Reminder', {
             body: 'Your alert has been sent. For the most reliable updates, please keep Loops open in the background.',
-            icon: '/favicon.ico', // Optional: adds an icon
+            icon: '/favicon.ico',
           });
         }
       }
@@ -82,7 +78,6 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
     if (timerRef.current) clearTimeout(timerRef.current);
     if (intervalRef.current) clearInterval(intervalRef.current);
 
-    // Only reset state if it hasn't been successfully activated
     if (sosState !== 'activated') {
       setSosState('canceled');
       setStatusText('Activation Canceled. Press and hold to try again.');
@@ -90,32 +85,21 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
     }
   }, [sosState]);
 
-  // Event handlers for pointer events (works for mouse, touch, pen)
   const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    // Only respond to the primary button (e.g., left mouse click)
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     startHold();
   };
-
-  const handlePointerUp = () => {
-    cancelHold();
-  };
-
+  const handlePointerUp = () => cancelHold();
   const handlePointerLeave = () => {
-    // If the user is still holding down the button and moves the pointer away, cancel.
-    if (sosState === 'holding') {
-      cancelHold();
-    }
+    if (sosState === 'holding') cancelHold();
   };
 
-  // Keyboard accessibility handlers
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       startHold();
     }
   };
-
   const handleKeyUp = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -123,26 +107,24 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
     }
   };
 
-  // Effect to manage pocket-dial detection listeners
   useEffect(() => {
     startPocketDialDetection();
-
-    // Cleanup function to stop listeners when the component unmounts
     return () => {
       stopPocketDialDetection();
-      // Also clear any running timers on unmount
       if (timerRef.current) clearTimeout(timerRef.current);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
 
-  const buttonColor = disabled ? '#9CA3AF' : '#DC2626'; // Gray when disabled, Red otherwise
   const progressStyle = {
-    background: `conic-gradient(${buttonColor} ${progress * 3.6}deg, #F3F4F6 ${progress * 3.6}deg)`
+    background: `conic-gradient(var(--destructive) ${progress * 3.6}deg, var(--secondary) ${progress * 3.6}deg)`
   };
 
+  const buttonClasses = `${styles.sosButton} ${sosState === 'idle' ? styles.idle : ''}`;
+  const statusClasses = `${styles.sosStatus} ${sosState === 'activated' ? styles.activated : ''}`;
+
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className={styles.sosButtonContainer}>
       <button
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
@@ -152,39 +134,14 @@ const SOSButton: React.FC<SOSButtonProps> = ({ onActivate, holdTime = 3000, disa
         disabled={disabled || sosState === 'activated'}
         aria-label="SOS Emergency Button"
         aria-describedby="sos-status"
-        style={{
-          width: '200px',
-          height: '200px',
-          borderRadius: '50%',
-          border: 'none',
-          color: 'white',
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          background: '#F3F4F6', // Light gray background for the progress track
-          outline: 'none',
-          ...progressStyle,
-          transition: 'background-color 0.3s',
-        }}
+        className={buttonClasses}
+        style={progressStyle}
       >
-        <div style={{
-          width: '180px',
-          height: '180px',
-          borderRadius: '50%',
-          backgroundColor: buttonColor,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1,
-        }}>
+        <div className={styles.sosButtonInner}>
           SOS
         </div>
       </button>
-      <div id="sos-status" aria-live="assertive" style={{ marginTop: '20px', fontSize: '1.2rem', color: '#4B5563' }}>
+      <div id="sos-status" aria-live="assertive" className={statusClasses}>
         {statusText}
       </div>
     </div>

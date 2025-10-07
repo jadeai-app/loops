@@ -93,7 +93,14 @@ describe('SOS Engine Integration Tests', () => {
     expect(eventData?.status).toBe('active');
   });
 
-  test.skip('should block more than 3 SOS triggers within an hour', async () => {
+  test('should block more than 3 SOS triggers within an hour', async () => {
+    // Setup: Create a circle for the user
+    await db.collection('circles').doc(mockCircleId).set({
+      name: 'Test Circle',
+      owner_uid: mockUser.uid,
+      members: [mockUser.uid],
+    });
+
     const wrapped = firebaseTest.wrap(triggerSOS);
     const request: CallableRequest = {
       data: { ...mockLocationData, circleId: mockCircleId },
@@ -120,7 +127,7 @@ describe('SOS Engine Integration Tests', () => {
     await expect(wrapped(request)).rejects.toThrow(/You must be logged in to trigger an SOS/);
   });
 
-  test.skip('should reject calls if user is remotely locked', async () => {
+  test('should reject calls if user is remotely locked', async () => {
     // Set a remote lock on the user's profile
     const expires = admin.firestore.Timestamp.fromMillis(Date.now() + 15 * 60000);
     await db.collection('profiles').doc(mockUser.uid).set({

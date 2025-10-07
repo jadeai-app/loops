@@ -14,12 +14,7 @@ const https = {
   },
 };
 
-const auth = {
-    onNewUser: (handler: any) => handler,
-}
-
 module.exports = {
   https,
   logger,
-  auth,
 };
