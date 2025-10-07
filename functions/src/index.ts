@@ -6,6 +6,7 @@
  */
 
 import { triggerSOS } from "./http/sos/triggerSOS";
+import { enforceAbuseControls } from "./triggers/enforceAbuseControls";
 
 // Export all functions for deployment
-export { triggerSOS };
+export { triggerSOS, enforceAbuseControls };

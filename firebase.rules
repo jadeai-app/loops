@@ -2,42 +2,82 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions for clarity
+
+    // --- Helper Functions ---
     function isSignedIn() {
       return request.auth != null;
     }
-    function isOwnerOfProfile(profileId) {
-      return isSignedIn() && request.auth.uid == profileId;
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
-    // A user can only read and write their own profile
-    match /profiles/{profileId} {
-      allow read, write: if isOwnerOfProfile(profileId);
+    function isCircleMember(circleId) {
+      return isSignedIn() && exists(/databases/$(database)/documents/circles/$(circleId)/members/$(request.auth.uid));
     }
 
-    // Rules for SOS events
+    // --- Collection Rules ---
+
+    // A user can only read and write their own profile.
+    match /profiles/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // A user can only manage their own limits document.
+    match /user_limits/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Rules for circles and their members subcollection.
+    match /circles/{circleId} {
+      // Allow create if the owner_uid in the new document matches the user's auth UID.
+      allow create: if isSignedIn() && request.resource.data.owner_uid == request.auth.uid;
+      // Allow read for the owner or any member of the circle.
+      allow read: if isOwner(resource.data.owner_uid) || isCircleMember(circleId);
+      // Allow update and delete only for the owner.
+      allow update, delete: if isOwner(resource.data.owner_uid);
+
+      // Rules for the members subcollection.
+      match /members/{userId} {
+        // The circle owner can create, update, and delete memberships.
+        // A user can also delete their own membership to leave a circle.
+        allow create, update, delete: if isOwner(get(/databases/$(database)/documents/circles/$(circleId)).data.owner_uid) || isOwner(userId);
+        // Any member of the circle can read the list of other members.
+        allow read: if isCircleMember(circleId);
+      }
+    }
+
+    // Rules for SOS events.
     match /sos_events/{eventId} {
       // Any signed-in user can create an SOS event.
-      // The user_uid will be set by the Cloud Function.
+      // The `triggerSOS` Cloud Function will validate ownership and other details.
       allow create: if isSignedIn();
 
-      // An event can be read by its owner or by a member of the circle it was sent to.
-      allow read: if isOwner(resource.data.user_uid) ||
-                   exists(/databases/$(database)/documents/circles/$(resource.data.circle_id)/members/$(request.auth.uid));
+      // An event can be read by its owner or by any member of the circle it was sent to.
+      allow read: if isOwner(resource.data.user_uid) || isCircleMember(resource.data.circle_id);
 
-      // An event can only be updated by its owner, and only to mark it as 'resolved'.
+      // An event can only be updated by its owner, and only to change the status to 'resolved'.
       allow update: if isOwner(resource.data.user_uid) &&
                      request.resource.data.status == 'resolved' &&
                      resource.data.status == 'active';
     }
 
-    // A user can manage their own push subscriptions
+    // A user can manage their own push subscriptions.
     match /push_subscriptions/{subId} {
-      allow read, write: if isSignedIn() && request.auth.uid == resource.data.user_uid;
+      // The user_uid must match the authenticated user.
+      allow create: if isOwner(request.resource.data.user_uid);
+      allow read, update, delete: if isOwner(resource.data.user_uid);
     }
 
-    // Deny all other collections by default
-    match /{document=**} {
+    // Notification logs are for system use. Users can read logs related to their own SOS events.
+    match /notification_logs/{logId} {
+      allow read: if isSignedIn() && get(/databases/$(database)/documents/sos_events/$(resource.data.event_id)).data.user_uid == request.auth.uid;
+      // Writes are only allowed from backend functions (enforced by default deny).
+      allow create, update, delete: if false;
+    }
+
+    // Explicitly deny access to all other paths. This is the "Zero Trust" default.
+    match /{path=**} {
       allow read, write: if false;
     }
   }
