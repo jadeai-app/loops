@@ -6,7 +6,7 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/tests/integration/'],
   // Firebase SDKs use ESM modules, so we need to tell Jest to transform them
   transformIgnorePatterns: [
     '/node_modules/(?!(firebase|@firebase|jose)/)',

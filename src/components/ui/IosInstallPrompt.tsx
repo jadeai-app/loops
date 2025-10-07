@@ -1,81 +1,58 @@
 'use client';
 
 import React from 'react';
+import styles from './IosInstallPrompt.module.css';
+
+// Simple SVG icons to avoid new dependencies
+const ShareIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+);
+const PlusSquareIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+);
+const XIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+);
+
 
 interface IosInstallPromptProps {
   onClose: () => void;
 }
 
 const IosInstallPrompt: React.FC<IosInstallPromptProps> = ({ onClose }) => {
-  const modalStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '90%',
-    maxWidth: '400px',
-    backgroundColor: 'white',
-    padding: '2rem',
-    borderRadius: '12px',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-    zIndex: 1000,
-    textAlign: 'center',
-  };
-
-  const backdropStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 999,
-  };
-
-  const headerStyle: React.CSSProperties = {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    marginBottom: '1rem',
-  };
-
-  const paragraphStyle: React.CSSProperties = {
-    marginBottom: '1.5rem',
-    lineHeight: '1.6',
-  };
-
-  const importantNoteStyle: React.CSSProperties = {
-    ...paragraphStyle,
-    fontWeight: 'bold',
-    color: '#DC2626', // Red-600
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#1F2937', // Gray-800
-    color: 'white',
-    border: 'none',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '8px',
-    fontSize: '1rem',
-    cursor: 'pointer',
-  };
-
   return (
     <>
-      <div style={backdropStyle} onClick={onClose} />
-      <div style={modalStyle}>
-        <h2 style={headerStyle}>Install Loops for Full Reliability</h2>
-        <p style={paragraphStyle}>
-          To get the best performance and ensure alerts are not missed, install Loops on your Home Screen.
-        </p>
-        <p style={importantNoteStyle}>
-          For the most reliable alerts, please keep Loops open in the background.
-        </p>
-        <ol style={{ textAlign: 'left', paddingLeft: '2rem', marginBottom: '1.5rem' }}>
-          <li>Tap the <strong>Share</strong> button in Safari.</li>
-          <li>Scroll down and tap <strong>'Add to Home Screen'</strong>.</li>
-          <li>Tap <strong>'Add'</strong> to confirm.</li>
-        </ol>
-        <button style={buttonStyle} onClick={onClose}>
+      <div className={styles.backdrop} onClick={onClose} />
+      <div className={styles.modal}>
+        <div className={styles.header}>
+            <h2 className={styles.title}>Install Loops for Full Reliability</h2>
+            <button className={styles.closeButton} onClick={onClose} aria-label="Close">
+                <XIcon />
+            </button>
+        </div>
+        <div className={styles.content}>
+            <p className={styles.description}>
+                For the best performance and to ensure alerts are never missed, add Loops to your Home Screen.
+            </p>
+            <div className={styles.importantNote}>
+                <strong>Important:</strong> For the most reliable alerts, please keep Loops running in the background.
+            </div>
+            <ol className={styles.stepsList}>
+                <li className={styles.step}>
+                    <div className={styles.stepNumber}>1</div>
+                    <span>Tap the <ShareIcon /> button in Safari.</span>
+                </li>
+                <li className={styles.step}>
+                    <div className={styles.stepNumber}>2</div>
+                    <span>Scroll down and tap <PlusSquareIcon /> 'Add to Home Screen'.</span>
+                </li>
+                <li className={styles.step}>
+                    <div className={styles.stepNumber}>3</div>
+                    <span>Tap 'Add' to confirm.</span>
+                </li>
+            </ol>
+        </div>
+        <button className={styles.button} onClick={onClose}>
           Got It
         </button>
       </div>
