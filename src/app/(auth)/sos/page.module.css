@@ -1,0 +1,37 @@
+/*
+ * SOSPage.module.css
+ *
+ * Styles for the SOS activation page, designed for extreme clarity,
+ * simplicity, and ease of use in an emergency.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 1rem;
+  text-align: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  font-size: 1rem;
+  color: var(--accent-foreground);
+  margin-bottom: 2rem;
+}

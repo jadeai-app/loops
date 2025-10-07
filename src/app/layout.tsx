@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { AuthProvider } from "./providers/AuthProvider";
 import FCMProvider from "./providers/FCMProvider";
 import { AccessibilityProvider } from "./providers/AccessibilityProvider";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Loops - Your Safety Circle",
@@ -37,7 +34,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className} style={bodyStyle}>
+      <body style={bodyStyle}>
         <AuthProvider>
           <FCMProvider>
             <AccessibilityProvider>

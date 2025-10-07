@@ -8,7 +8,7 @@ import * as path from 'path';
 import 'jest';
 
 // Import and initialize the firebase-functions-test SDK
-import * as functionsTest from 'firebase-functions-test';
+import functionsTest from 'firebase-functions-test';
 import { CallableRequest } from 'firebase-functions/v2/https';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
@@ -69,6 +69,13 @@ describe('SOS Engine Integration Tests', () => {
   const mockRawRequest = {} as any; // Mock raw request as it's required but not used in the function
 
   test('should create an SOS event on first trigger', async () => {
+    // Setup: Create a circle for the user in the test database
+    const authedDb = testEnv.authenticatedContext(mockUser.uid).firestore();
+    await setDoc(doc(authedDb, 'circles', mockCircleId), {
+      owner_uid: mockUser.uid,
+      name: 'Test Circle'
+    });
+
     const wrapped = firebaseTest.wrap(triggerSOS);
 
     const request: CallableRequest = {
@@ -84,8 +91,8 @@ describe('SOS Engine Integration Tests', () => {
     expect(result.eventId).toBeDefined();
 
     // 2. Verify a new sos_events document was created
-    const db = testEnv.unauthenticatedContext().firestore();
-    const sosEventDoc = await getDoc(doc(db, 'sos_events', result.eventId as string));
+    const unauthedDb = testEnv.unauthenticatedContext().firestore();
+    const sosEventDoc = await getDoc(doc(unauthedDb, 'sos_events', result.eventId as string));
     expect(sosEventDoc.exists()).toBe(true);
     const eventData = sosEventDoc.data();
     expect(eventData?.user_uid).toBe(mockUser.uid);

@@ -1,122 +1,90 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
-import { clientDb } from '../../../lib/firebase/clientApp';
-import { useAuth } from '../providers/AuthProvider';
-import { SosEvent } from '../../../types';
+import Link from 'next/link';
+import { useAuth } from '@/app/providers/AuthProvider';
+import styles from './page.module.css';
 
-/**
- * A real-time dashboard to display a user's active and past SOS events.
- * This component is protected by the AuthLayout and uses the useAuth hook
- * to get the current user's data.
- */
+// Simple SVG icons to avoid new dependencies
+const ShieldIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+);
+const UserPlusIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+);
+const BellIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+);
+
+// Mock data for display purposes - in a real app, this would come from state or props.
+const trustedContacts = [
+    { id: 1, name: "Jane Doe", initials: "JD" },
+    { id: 2, name: "John Smith", initials: "JS" },
+    { id: 3, name: "Peter Jones", initials: "PJ" },
+];
+
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [activeEvent, setActiveEvent] = useState<SosEvent | null>(null);
-  const [pastEvents, setPastEvents] = useState<SosEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const eventsCollection = collection(clientDb, 'sos_events');
-    const q = query(
-      eventsCollection,
-      where('user_uid', '==', user.uid),
-      orderBy('created_at', 'desc'),
-      limit(20) // Limit to the last 20 events for performance
-    );
-
-    const unsubscribe = onSnapshot(q,
-      (querySnapshot) => {
-        const allEvents: SosEvent[] = [];
-        querySnapshot.forEach((doc) => {
-          allEvents.push({ id: doc.id, ...doc.data() } as SosEvent);
-        });
-
-        // Find the active event (if any)
-        const currentActiveEvent = allEvents.find(event => event.status === 'active') || null;
-        setActiveEvent(currentActiveEvent);
-
-        // Filter for past (resolved) events
-        const resolvedEvents = allEvents.filter(event => event.status === 'resolved');
-        setPastEvents(resolvedEvents);
-
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching SOS events:", err);
-        setError("Failed to load SOS history. Please try again later.");
-        setLoading(false);
-      }
-    );
-
-    // Cleanup the listener when the component unmounts or the user changes
-    return () => unsubscribe();
-  }, [user]);
-
-  if (loading) {
-    return <main><p>Loading Dashboard...</p></main>;
-  }
-
-  if (error) {
-    return <main><p style={{ color: 'red' }}>{error}</p></main>;
-  }
-
-  const StaticMap = ({ event }: { event: SosEvent }) => {
-    const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${event.location.latitude},${event.location.longitude}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7Clabel:S%7C${event.location.latitude},${event.location.longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
-    return <img src={mapUrl} alt="Map showing last known location" style={{ maxWidth: '100%', borderRadius: '8px' }} />;
-  };
 
   return (
-    <main style={{ padding: '2rem' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>SOS Dashboard</h1>
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Welcome back, {user?.displayName || 'User'}!</h1>
+      </header>
 
-      {/* Active SOS Section */}
-      <section aria-labelledby="active-sos-heading">
-        <h2 id="active-sos-heading" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Active SOS</h2>
-        {activeEvent ? (
-          <div style={{ border: '2px solid #DC2626', padding: '1.5rem', borderRadius: '8px' }}>
-            <p><strong>Status:</strong> <span style={{ color: '#DC2626' }}>ACTIVE</span></p>
-            <p><strong>Triggered At:</strong> {new Date(activeEvent.created_at.seconds * 1000).toLocaleString()}</p>
-            <div style={{ marginTop: '1rem' }}>
-              <StaticMap event={activeEvent} />
-            </div>
-            {/* TODO: Add a button to resolve the SOS */}
+      <div className={styles.grid}>
+        <div className={`${styles.card} ${styles.destructiveCard}`} style={{ gridColumn: '1 / -1' }}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}>Emergency SOS</h2>
+            <ShieldIcon />
           </div>
-        ) : (
-          <p>No active SOS events.</p>
-        )}
-      </section>
+          <div className={styles.cardContent}>
+            <p className={styles.cardDescription}>
+              Activate an SOS to immediately alert your trusted contacts with your location.
+            </p>
+            <Link href="/sos" className={`${styles.button} ${styles.buttonDestructive}`}>
+              Go to SOS Page
+            </Link>
+          </div>
+        </div>
 
-      {/* Past SOS Events Section */}
-      <section aria-labelledby="past-sos-heading" style={{ marginTop: '2.5rem' }}>
-        <h2 id="past-sos-heading" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Event History</h2>
-        {pastEvents.length > 0 ? (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {pastEvents.map(event => (
-              <li key={event.id} style={{ border: '1px solid #E5E7EB', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                <p><strong>Status:</strong> {event.status} {event.resolution_reason && `(${event.resolution_reason})`}</p>
-                <p><strong>Date:</strong> {new Date(event.created_at.seconds * 1000).toLocaleString()}</p>
-              </li>
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}>Trusted Contacts</h2>
+            <UserPlusIcon />
+          </div>
+          <div className={styles.cardContent}>
+            <div className={styles.cardValue}>{trustedContacts.length}</div>
+            <p className={styles.cardSubtext}>contacts in your safety circle</p>
+          </div>
+        </div>
+
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}>Notifications</h2>
+            <BellIcon />
+          </div>
+          <div className={styles.cardContent}>
+            <div className={styles.cardValue}>0</div>
+            <p className={styles.cardSubtext}>unread alerts or updates</p>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${styles.card} ${styles.full}`} style={{ marginTop: '1.5rem' }}>
+        <div className={styles.cardHeader}>
+          <h2 className={styles.cardTitle}>Manage Your Circle</h2>
+        </div>
+        <div className={styles.cardContent}>
+          <div className={styles.contactList}>
+            {trustedContacts.map(contact => (
+              <div key={contact.id} className={styles.contactItem}>
+                <div className={styles.avatar}>{contact.initials}</div>
+                <span className={styles.contactName}>{contact.name}</span>
+              </div>
             ))}
-          </ul>
-        ) : (
-          <p>No past SOS events found.</p>
-        )}
-      </section>
-    </main>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
-
-// Add an 'id' property to the SosEvent interface for local use
-declare module '../../../types' {
-    interface SosEvent {
-        id?: string;
-    }
 }

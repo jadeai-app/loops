@@ -1,0 +1,87 @@
+/*
+ * SOSButton.module.css
+ *
+ * Scoped styles for the primary SOSButton component, designed to be modern,
+ * accessible, and visually clear in high-stress situations.
+ */
+
+.sosButtonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.sosButton {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--secondary); /* Light gray track for the progress */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sosButton:not(:disabled):hover {
+  transform: scale(1.02);
+}
+
+.sosButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* The inner button that contains the "SOS" text */
+.sosButtonInner {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transition: background-color 0.3s;
+}
+
+.sosButton:disabled .sosButtonInner {
+    background-color: var(--accent);
+}
+
+/* Pulsating animation for the idle state to draw attention */
+.sosButton.idle .sosButtonInner {
+  animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(220, 38, 38, 0);
+  }
+}
+
+/* The status text below the button */
+.sosStatus {
+  font-size: 1.125rem;
+  color: var(--accent-foreground);
+  min-height: 2rem;
+  transition: color 0.3s;
+}
+
+.sosStatus.activated {
+    color: var(--primary);
+    font-weight: 600;
+}
