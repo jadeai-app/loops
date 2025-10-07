@@ -20,6 +20,7 @@ if (!sendGridApiKey) {
   );
 } else {
   sgMail.setApiKey(sendGridApiKey);
+  sgMail.setDataResidency("eu");
 }
 
 /**
