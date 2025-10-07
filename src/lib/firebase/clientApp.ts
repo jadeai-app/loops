@@ -1,10 +1,21 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore, GeoPoint } from 'firebase/firestore';
+import { getMessaging } from 'firebase/messaging';
 import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getFirestore } from 'firebase/firestore';
 
-// Your web app's Firebase configuration, loaded from environment variables.
-// These variables must be prefixed with NEXT_PUBLIC_ to be exposed to the browser.
+// Define types for our callable function
+interface TriggerSOSRequest {
+  location: GeoPoint;
+  accuracy_meters: number;
+}
+
+interface TriggerSOSResponse {
+  success: boolean;
+  eventId: string;
+  message: string;
+}
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -14,39 +25,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-/**
- * Initializes the Firebase app on the client side.
- * It ensures that the app is only initialized once (singleton pattern).
- * This is safe to call from any client component.
- *
- * @returns The initialized Firebase App instance.
- */
-const initializeClientApp = () => {
-  if (getApps().length > 0) {
-    return getApp();
-  }
-  return initializeApp(firebaseConfig);
-};
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+const firestore = getFirestore(app);
+const messaging = getMessaging(app);
+const functions = getFunctions(app);
 
-// Initialize the app
-const clientApp = initializeClientApp();
+// Create a typed callable function
+const triggerSOSCallable = httpsCallable<TriggerSOSRequest, TriggerSOSResponse>(functions, 'triggerSOS');
 
-// Export ready-to-use instances of the Firebase services
-export const clientAuth = getAuth(clientApp);
-export const clientDb = getFirestore(clientApp);
-export const clientFunctions = getFunctions(clientApp);
 
-// Export a typed wrapper for the triggerSOS callable function
-interface TriggerSOSRequest {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-  circleId: string; // This will need to be fetched from user data
-}
-
-interface TriggerSOSResponse {
-  status: string;
-  eventId: string;
-}
-
-export const triggerSOSCallable = httpsCallable<TriggerSOSRequest, TriggerSOSResponse>(clientFunctions, 'triggerSOS');
+export { app, auth, firestore, messaging, triggerSOSCallable };

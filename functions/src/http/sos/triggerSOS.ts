@@ -1,21 +1,21 @@
 import { https, logger } from "firebase-functions/v2";
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore, Timestamp } from "firebase-admin/firestore";
-import { getMessaging } from "firebase-admin/messaging";
+import { db } from "../../lib/firebaseAdmin";
+import { PubSub } from "@google-cloud/pubsub";
+import { FieldValue } from "firebase-admin/firestore";
 
-// Initialize Firebase Admin SDK
-initializeApp();
-const db = getFirestore();
-const messaging = getMessaging();
+const pubSubClient = new PubSub();
+const SOS_TRIGGERED_TOPIC = 'sos-triggered';
 
 /**
  * A 2nd Gen HTTP Cloud Function to trigger an SOS alert.
  *
  * This function is the primary entry point for the SOS activation engine. It is responsible for:
  * 1. Authenticating the user via their Firebase Auth ID token.
- * 2. Enforcing rate limits to prevent abuse (3 activations per rolling hour).
+ * 2. Fetching the user's circle to associate with the event.
  * 3. Creating a new SOS event document in Firestore.
- * 4. Publishing the event to the `sos-triggered` Pub/Sub topic for decoupled processing.
+ * 4. Publishing the event to a Pub/Sub topic for decoupled notification processing.
+ *
+ * Rate limiting is handled by the `enforceAbuseControls` trigger, not this function.
  */
 export const triggerSOS = https.onCall(async (request) => {
   // 1. Authenticate the user
@@ -30,36 +30,42 @@ export const triggerSOS = https.onCall(async (request) => {
 
   logger.info(`SOS triggered by user: ${uid}`);
 
-  // 2. Enforce rate limiting (TODO: Implement Firestore transaction)
-  // - Check the `user_limits` collection for the user's `sos_count` and `last_sos_time`.
-  // - If the user has exceeded 3 activations in the last hour, throw an error.
-  // - Otherwise, increment the count.
+  // 2. Fetch the user's default circle
+  const circlesRef = db.collection('circles').where('owner_uid', '==', uid).limit(1);
+  const circleSnapshot = await circlesRef.get();
+
+  if (circleSnapshot.empty) {
+    logger.error(`User ${uid} has no circles and cannot trigger an SOS.`);
+    throw new https.HttpsError(
+      "failed-precondition",
+      "You must create a circle before you can trigger an SOS."
+    );
+  }
+  const circleId = circleSnapshot.docs[0].id;
+
 
   // 3. Create the SOS event in Firestore
-  // - Get the user's default circle.
-  // - Create a new document in the `sos_events` collection.
-  const now = Timestamp.now();
-  // 30 days in seconds (30 * 24 * 60 * 60)
-  const expireAt = new Timestamp(now.seconds + 2592000, now.nanoseconds);
-
   const eventData = {
     user_uid: uid,
-    circle_id: "default_circle_id", // TODO: Fetch the user's actual circle ID
+    circle_id: circleId,
     status: "active",
-    location: request.data.location || null, // Expecting location data from the client
+    location: request.data.location || null, // Expecting GeoPoint data from the client
     accuracy_meters: request.data.accuracy_meters || null,
     trigger_method: "hold", // TODO: Determine from client data
-    created_at: now,
-    expireAt: expireAt,
+    created_at: FieldValue.serverTimestamp(),
   };
 
   const eventRef = await db.collection("sos_events").add(eventData);
   logger.info(`SOS event ${eventRef.id} created for user ${uid}.`);
 
-  // 4. Publish to Pub/Sub (TODO: Implement Pub/Sub publishing)
-  // - Publish the event ID to the `sos-triggered` topic.
-  // const pubSubClient = new PubSub();
-  // await pubSubClient.topic('sos-triggered').publishJSON({ eventId: eventRef.id });
+  // 4. Publish to Pub/Sub for notification processing
+  try {
+    const messageId = await pubSubClient.topic(SOS_TRIGGERED_TOPIC).publishJSON({ eventId: eventRef.id });
+    logger.info(`Event ${eventRef.id} published to ${SOS_TRIGGERED_TOPIC} with message ID ${messageId}.`);
+  } catch (error) {
+    logger.error(`Failed to publish event ${eventRef.id} to Pub/Sub.`, { error });
+    // Continue execution, but log the error. The system should be resilient to this.
+  }
 
   // 5. Return a success response to the client
   return {

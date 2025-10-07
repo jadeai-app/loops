@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "./providers/AuthProvider";
 import FCMProvider from "./providers/FCMProvider";
-import Footer from "../components/layout/Footer";
-// import "./globals.css"; // Assuming a global stylesheet exists
+import { AccessibilityProvider } from "./providers/AccessibilityProvider";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,10 +40,9 @@ export default function RootLayout({
       <body className={inter.className} style={bodyStyle}>
         <AuthProvider>
           <FCMProvider>
-            <main style={mainStyle}>
+            <AccessibilityProvider>
               {children}
-            </main>
-            <Footer />
+            </AccessibilityProvider>
           </FCMProvider>
         </AuthProvider>
       </body>

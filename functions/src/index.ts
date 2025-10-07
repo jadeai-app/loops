@@ -6,9 +6,7 @@
  */
 
 import { triggerSOS } from "./http/sos/triggerSOS";
-import { deleteUserData } from "./http/user/deleteUserData";
-import { webrtcOffer } from "./http/webrtc/offer";
-import { webrtcAnswer } from "./http/webrtc/answer";
+import { enforceAbuseControls } from "./triggers/enforceAbuseControls";
 
 // Export all functions for deployment
-export { triggerSOS, deleteUserData, webrtcOffer, webrtcAnswer };
+export { triggerSOS, enforceAbuseControls };
