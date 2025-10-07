@@ -1,0 +1,35 @@
+# Placeholder for End-to-End (E2E) and Performance testing workflow.
+# This workflow will run on every push to the main branch.
+# It will include jobs for running E2E tests and performance SLA gates.
+name: E2E & Performance
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Run E2E tests
+        run: echo "E2E tests placeholder" # Replace with actual E2E test command (e.g., Cypress)
+
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Run performance tests
+        run: echo "Performance tests placeholder" # Replace with actual performance test command (e.g., k6)
