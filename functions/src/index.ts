@@ -7,6 +7,8 @@
 
 import { triggerSOS } from "./http/sos/triggerSOS";
 import { enforceAbuseControls } from "./triggers/enforceAbuseControls";
+import { createUserProfile } from "./triggers/createUserProfile";
+import { createFirstCircle } from "./http/onboarding/createFirstCircle";
 
 // Export all functions for deployment
-export { triggerSOS, enforceAbuseControls };
+export { triggerSOS, enforceAbuseControls, createUserProfile, createFirstCircle };
