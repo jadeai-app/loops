@@ -13,8 +13,8 @@
     "dev:functions": "npm run dev --workspace=functions",
     "build:functions": "npm run build --workspace=functions",
     "dev:all": "npm-run-all --parallel dev dev:functions",
-    "test:unit": "jest",
-    "test:integration": "jest --config=jest.integration.config.js",
+    "test:unit": "jest --config=jest.unit.config.js",
+    "test:integration": "FIRESTORE_EMULATOR_HOST=\"127.0.0.1:8080\" PUBSUB_EMULATOR_HOST=\"127.0.0.1:8085\" jest --config=jest.integration.config.js",
     "test:e2e": "echo \"Error: no e2e tests specified\" && exit 1"
   },
   "dependencies": {
