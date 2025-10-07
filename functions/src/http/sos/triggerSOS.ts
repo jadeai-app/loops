@@ -30,6 +30,35 @@ export const triggerSOS = https.onCall(async (request) => {
 
   logger.info(`SOS triggered by user: ${uid}`);
 
+  // Check if the user is remotely locked
+  const profileRef = db.collection('profiles').doc(uid);
+  const profileDoc = await profileRef.get();
+  if (profileDoc.exists) {
+    const profileData = profileDoc.data();
+    if (profileData?.remote_lock_expires && profileData.remote_lock_expires.toMillis() > Date.now()) {
+      logger.warn(`SOS trigger blocked for locked user ${uid}.`);
+      throw new https.HttpsError(
+        'permission-denied',
+        'Your account is temporarily locked.'
+      );
+    }
+  }
+
+  // Abuse control: Limit SOS triggers to 3 per hour
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const recentSosEvents = await db.collection('sos_events')
+    .where('user_uid', '==', uid)
+    .where('created_at', '>=', oneHourAgo)
+    .get();
+
+  if (recentSosEvents.size >= 3) {
+    logger.warn(`Abuse control triggered for user ${uid}.`);
+    throw new https.HttpsError(
+      'resource-exhausted',
+      'You have exceeded the SOS limit. Please try again later.'
+    );
+  }
+
   // 2. Fetch the user's default circle
   const circlesRef = db.collection('circles').where('owner_uid', '==', uid).limit(1);
   const circleSnapshot = await circlesRef.get();
