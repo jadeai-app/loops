@@ -35,5 +35,17 @@ const functions = getFunctions(app);
 // Create a typed callable function
 const triggerSOSCallable = httpsCallable<TriggerSOSRequest, TriggerSOSResponse>(functions, 'triggerSOS');
 
+// Define types for the createFirstCircle callable
+interface CreateCircleRequest {
+  circleName: string;
+}
 
-export { app, auth, firestore, messaging, triggerSOSCallable };
+interface CreateCircleResponse {
+  success: boolean;
+  circleId: string;
+}
+
+const createFirstCircleCallable = httpsCallable<CreateCircleRequest, CreateCircleResponse>(functions, 'createFirstCircle');
+
+
+export { app, auth, firestore, messaging, triggerSOSCallable, createFirstCircleCallable };
