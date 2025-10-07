@@ -6,6 +6,7 @@
  */
 
 import { triggerSOS } from "./http/sos/triggerSOS";
+import { notifySOS } from "./pubsub/notifySOS";
 
 // Export all functions for deployment
-export { triggerSOS };
+export { triggerSOS, notifySOS };

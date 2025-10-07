@@ -1,12 +1,14 @@
 import { https, logger } from "firebase-functions/v2";
-import { initializeApp } from "firebase-admin/app";
+import { initializeApp, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { getMessaging } from "firebase-admin/messaging";
+import { PubSub } from "@google-cloud/pubsub";
 
-// Initialize Firebase Admin SDK
-initializeApp();
+// Initialize Firebase Admin SDK if not already initialized
+if (!getApps().length) {
+  initializeApp();
+}
 const db = getFirestore();
-const messaging = getMessaging();
+const pubSubClient = new PubSub();
 
 /**
  * A 2nd Gen HTTP Cloud Function to trigger an SOS alert.
@@ -51,10 +53,19 @@ export const triggerSOS = https.onCall(async (request) => {
   const eventRef = await db.collection("sos_events").add(eventData);
   logger.info(`SOS event ${eventRef.id} created for user ${uid}.`);
 
-  // 4. Publish to Pub/Sub (TODO: Implement Pub/Sub publishing)
-  // - Publish the event ID to the `sos-triggered` topic.
-  // const pubSubClient = new PubSub();
-  // await pubSubClient.topic('sos-triggered').publishJSON({ eventId: eventRef.id });
+  // 4. Publish to Pub/Sub
+  // This decouples the SOS trigger from the notification logic.
+  try {
+    await pubSubClient.topic("sos-triggered").publishMessage({
+      json: { eventId: eventRef.id },
+    });
+    logger.info(`Published SOS event ${eventRef.id} to Pub/Sub topic "sos-triggered".`);
+  } catch (error) {
+    logger.error(`Failed to publish SOS event ${eventRef.id} to Pub/Sub.`, error);
+    // In a production system, you might want to handle this failure more gracefully.
+    // For now, we log the error but still return success to the client,
+    // as the primary SOS event has been created.
+  }
 
   // 5. Return a success response to the client
   return {
