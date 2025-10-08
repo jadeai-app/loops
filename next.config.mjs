@@ -1,9 +1,10 @@
 // @ts-check
 
 import { withSentryConfig } from "@sentry/nextjs";
+import withPWAInit from "next-pwa";
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+let nextConfig = {
   webpack: (config, { isServer }) => {
     config.experiments = { ...config.experiments, asyncWebAssembly: true };
     return config;
@@ -12,6 +13,18 @@ const nextConfig = {
   // For example:
   // reactStrictMode: true,
 };
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  // add your own strategies to cache images and static assets
+  // fallbacks: {
+  //   image: "/static/images/fallback.png",
+  //   // document: '/offline',  // if you want to fallback to a custom page
+  // },
+});
+
+nextConfig = withPWA(nextConfig);
 
 const sentryConfig = {
   // For all available options, see:

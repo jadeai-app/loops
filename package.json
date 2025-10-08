@@ -14,7 +14,7 @@
     "build:functions": "npm run build --workspace=functions",
     "dev:all": "npm-run-all --parallel dev dev:functions",
     "test:unit": "jest --config=jest.unit.config.js",
-    "test:integration": "FIRESTORE_EMULATOR_HOST=\"127.0.0.1:8080\" PUBSUB_EMULATOR_HOST=\"127.0.0.1:8085\" jest --config=jest.integration.config.js",
+    "test:integration": "firebase emulators:exec --only auth,firestore,pubsub 'jest --config=jest.integration.config.js'",
     "test:e2e": "echo \"Error: no e2e tests specified\" && exit 1"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
     "firebase-tools": "^13.0.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "next-pwa": "^5.6.0",
     "npm-run-all": "^4.1.5",
     "ts-jest": "^29.1.0",
     "typescript": "^5"

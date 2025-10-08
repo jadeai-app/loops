@@ -5,8 +5,8 @@
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  // Replace this with your actual DSN
-  dsn: "https://examplePublicKey@o0.ingest.sentry.io/0",
+  // This value is read from environment variables. See .env.local.example
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 1.0,

@@ -1,11 +1,16 @@
-import { auth } from 'firebase-functions/v2';
-import { createUserProfile } from '../../../functions/src/triggers/createUserProfile';
+import { UserRecord } from 'firebase-functions/v2/auth';
+import * as logger from 'firebase-functions/logger';
+import { userProfileCreationHandler } from '../../../functions/src/triggers/createUserProfile';
+
+// Mock the entire firebase-functions/v2/auth module
+jest.mock('firebase-functions/v2/auth', () => ({
+  onNewUser: jest.fn((handler) => handler),
+}));
 
 // Import the mock implementations to control them in tests
 const { __mockSet } = require('firebase-admin');
-const { logger } = require('firebase-functions/v2');
 
-describe('createUserProfile Trigger Unit Tests', () => {
+describe('userProfileCreationHandler Unit Tests', () => {
   beforeEach(() => {
     // Reset mocks before each test
     jest.clearAllMocks();
@@ -16,17 +21,16 @@ describe('createUserProfile Trigger Unit Tests', () => {
     const mockUser = {
       uid: 'new-test-user-123',
       email: 'newuser@example.com',
-      // Add other properties as required by the UserRecord type if needed
-    } as auth.UserRecord;
+    } as UserRecord;
 
-    // 2. Act: Call the function with the mock user
-    await createUserProfile(mockUser);
+    // 2. Act: Call the handler with the mock user
+    await userProfileCreationHandler(mockUser);
 
     // 3. Assert: Verify that the profile was created correctly
     expect(__mockSet).toHaveBeenCalledWith({
       email: 'newuser@example.com',
       onboardingComplete: false,
-      createdAt: expect.any(Date), // Check that a date is being set
+      createdAt: expect.any(Date),
     });
 
     // Also assert that logging works as expected
@@ -40,13 +44,13 @@ describe('createUserProfile Trigger Unit Tests', () => {
     const mockUser = {
       uid: 'failing-user-456',
       email: 'fail@example.com',
-    } as auth.UserRecord;
+    } as UserRecord;
 
     const firestoreError = new Error('Firestore is unavailable');
     __mockSet.mockRejectedValueOnce(firestoreError);
 
-    // 2. Act: Call the function
-    await createUserProfile(mockUser);
+    // 2. Act: Call the handler
+    await userProfileCreationHandler(mockUser);
 
     // 3. Assert: Verify that the error was logged
     expect(logger.error).toHaveBeenCalledWith(

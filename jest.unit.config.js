@@ -15,5 +15,6 @@ module.exports = {
     'firebase-admin': '<rootDir>/tests/mocks/firebase-admin.ts',
     '@google-cloud/pubsub': '<rootDir>/tests/mocks/google-cloud-pubsub.ts',
     'firebase-functions/v2': '<rootDir>/tests/mocks/firebase-functions-v2.ts',
+    'firebase-functions/logger': '<rootDir>/tests/mocks/firebase-functions-logger.ts',
   },
 };
