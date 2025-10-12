@@ -1,10 +1,18 @@
 const mockGet = jest.fn();
 const mockAdd = jest.fn();
+const mockSet = jest.fn();
+const mockUpdate = jest.fn();
+const mockDelete = jest.fn();
 const mockCollection = jest.fn(() => ({
   where: jest.fn().mockReturnThis(),
   limit: jest.fn().mockReturnThis(),
   get: mockGet,
-  doc: jest.fn().mockReturnThis(),
+  doc: jest.fn(() => ({
+    get: mockGet,
+    set: mockSet,
+    update: mockUpdate,
+    delete: mockDelete,
+  })),
   add: mockAdd,
 }));
 
@@ -25,4 +33,7 @@ module.exports = {
   // Export mock implementations so they can be controlled from tests
   __mockGet: mockGet,
   __mockAdd: mockAdd,
+  __mockSet: mockSet,
+  __mockUpdate: mockUpdate,
+  __mockDelete: mockDelete,
 };
