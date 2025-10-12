@@ -14,7 +14,17 @@ const https = {
   },
 };
 
+const auth = {
+  onNewUser: (handler) => handler,
+};
+
+const config = () => ({
+  // Your mock config here
+});
+
 module.exports = {
   https,
   logger,
+  auth,
+  config,
 };
