@@ -11,34 +11,32 @@
 ---
 
 ## Vision
-In a world filled with slow, expensive, and unreliable safety apps, Loops establishes an unassailable competitive moat through its engineering choices. By building on a zero-cost, sovereign notification stack (FCM + WebRTC), we eliminate the primary barrier to scaling as a true public utility—messaging costs. Our vision is to create a universally accessible public safety net, starting with university students and expanding to municipalities and healthcare systems.
+Loops is a living digital safety ecosystem where users participate in intimate, socially accountable communities—Loops—that actively monitor personal and collective well-being. Our vision is to create a universally accessible public safety net, starting with a user-triggered SOS and evolving into an intelligent, automatic check-in system.
 
-While the long-term vision for Loops includes a sophisticated, AI-powered check-in system that learns the rhythm of your life, this repository contains the **Minimum Viable Product (MVP)** focused on validating the core technical thesis: a user can trigger an emergency alert that reaches their safety circle in under 2.8 seconds with 99.6% reliability, without a single line of SMS infrastructure or a single cent of messaging cost.
+For a complete overview of the project's vision, architecture, and requirements, please refer to [`agents.md`](./agents.md), which serves as the single source of truth.
 
 ## Key Features (MVP)
-The MVP is defined by its ruthless focus on the core alerting loop.
+The MVP is focused on validating the core technical thesis: a user can trigger an emergency alert that reaches their safety circle in under 2.8 seconds with 99.6% reliability.
 
-*   **Secure Onboarding:** Create an account using email/password or Google OAuth with a guided, multi-step process for security and permission setup.
-*   **SOS Activation Engine:** Trigger an emergency alert via a 3-second hold on a primary button. A silent activation mode (device shake or voice phrase) is available for coercion scenarios.
-*   **Safety Circle Management:** Create and manage a single "Safety Circle" with up to 20 members, inviting them through a secure, closed-network workflow.
-*   **Intelligent Contact Routing:** Manage up to 10 emergency contacts within your circle, assigning priority tiers to guide the notification cascade.
-*   **Sovereign Notification System:** A three-tier, zero-SMS notification cascade (FCM, WebRTC, Email) designed to achieve a 99.6% success rate.
-*   **Incident Resolution:** A simple in-app workflow to mark an active SOS as resolved and notify all circle members.
-*   **Offline Resilience:** Trigger an SOS while completely offline. The event is securely queued and synced upon network restoration.
-*   **Basic Operational Dashboard:** A real-time view of your current SOS status and a 30-day history of past events.
+*   **Secure Onboarding:** Create an account using email/password or Google OAuth.
+*   **SOS Activation Engine:** Trigger an emergency alert via a 3-second hold on a primary button.
+*   **Safety Circle Management:** Create and manage a "Safety Circle" with up to 20 members.
+*   **Sovereign Notification System:** A three-tier, zero-SMS notification cascade (FCM, WebRTC, Email).
+*   **Incident Resolution:** Mark an active SOS as resolved and notify all circle members.
+*   **Offline Resilience:** Queue an SOS trigger while offline and sync upon network restoration.
 
 ## Tech Stack
-The stack is chosen for its ability to deliver on our strict SLAs while minimizing operational complexity and maximizing developer velocity.
+The stack is chosen for its ability to deliver on our strict SLAs while minimizing operational complexity.
 
-*   **Frontend:** [**Next.js 14 (App Router)**](https://nextjs.org/) - For a superior developer experience, server components, and seamless integration with Vercel's Edge Network.
+*   **Frontend:** [**Next.js 14 (App Router)**](https://nextjs.org/)
 *   **Backend Platform:** [**Firebase (Unified Platform)**](https://firebase.google.com/)
-    *   **Database:** [**Cloud Firestore**](https://firebase.google.com/docs/firestore) - For powerful querying and robust offline persistence.
-    *   **Authentication:** [**Firebase Authentication**](https://firebase.google.com/docs/auth) - For a secure, standards-based identity system.
-    *   **Messaging:** [**Firebase Cloud Messaging (FCM)**](https://firebase.google.com/docs/cloud-messaging) - The backbone of our zero-cost, high-reliability notification strategy.
-    *   **Serverless Compute:** [**Cloud Functions for Firebase (2nd Gen)**](https://firebase.google.com/docs/functions) - To ensure low-latency, high-performance backend logic.
+    *   **Database:** [**Cloud Firestore**](https://firebase.google.com/docs/firestore)
+    *   **Authentication:** [**Firebase Authentication**](https://firebase.google.com/docs/auth)
+    *   **Messaging:** [**Firebase Cloud Messaging (FCM)**](https://firebase.google.com/docs/cloud-messaging)
+    *   **Serverless Compute:** [**Cloud Functions for Firebase (2nd Gen)**](https://firebase.google.com/docs/functions)
 
 ## Project Structure
-The repository is structured as a "monorepo-lite," keeping the frontend and Cloud Functions in a single repo for atomic deploys and shared type definitions.
+The repository is structured as a "monorepo-lite" using Yarn Workspaces, keeping the frontend and Cloud Functions in a single repo for atomic deploys and shared type definitions.
 
 ```
 loops-mvp/
@@ -63,7 +61,8 @@ loops-mvp/
 To get the project up and running on your local machine, follow these steps.
 
 **Prerequisites:**
-*   Node.js (v18 or later)
+*   Node.js (v20 or later)
+*   Yarn (`npm install -g yarn`)
 *   Firebase CLI (`npm install -g firebase-tools`)
 
 **1. Clone the repository:**
@@ -73,14 +72,15 @@ cd loops-mvp
 ```
 
 **2. Install dependencies:**
+This project uses Yarn Workspaces. Install all dependencies from the root directory.
 ```bash
-npm install
-cd functions && npm install && cd ..
+yarn install
 ```
 
 **3. Set up Firebase:**
 *   Create a new project on the [Firebase Console](https://console.firebase.google.com/).
 *   Add a Web app to your project to get your Firebase configuration keys.
+*   Enable the **Firestore, Authentication (Email/Password, Google), Cloud Functions, and Storage** services.
 *   Set up the Firebase CLI with your account: `firebase login`.
 *   Associate the project with your Firebase project: `firebase use --add`.
 
@@ -90,29 +90,29 @@ cd functions && npm install && cd ..
     NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
     NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-    # ... and so on
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+    NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
     ```
 
 **5. Run the development server & emulators:**
-*   Start the Firebase emulators for local development:
+*   Start the Firebase emulators for local development. This command reads the emulator configuration from `firebase.json`.
     ```bash
     firebase emulators:start
     ```
 *   In a new terminal, start the Next.js development server:
     ```bash
-    npm run dev
+    yarn dev
     ```
 Open [http://localhost:3000](http://localhost:3000) to view the app in your browser.
 
-## Future Roadmap
-The MVP is just the beginning. Our long-term vision is to build the most intelligent and comprehensive personal safety platform ever created. Future phases will include:
-*   **The Intelligent Check-In System:** An AI-powered system that learns your life's unique rhythm and patterns to provide automatic, effortless reassurance.
-*   **Specialized Safety Modes:** Unique configurations for students, families, travelers, and more.
-*   **Community & Networks:** Advanced safety networks that allow circles to interconnect intelligently.
-*   **Predictive Safety Intelligence:** A system that analyzes routes, environmental context, and behavioral patterns to prevent incidents before they happen.
+## Testing
+The project includes unit and integration tests.
+*   **Unit Tests:** `yarn test:unit`
+*   **Integration Tests:** `yarn test:integration` (requires emulators to be running)
 
 ## Contributing
-We welcome contributions from the community! If you're interested in helping build the future of personal safety, please see our `CONTRIBUTING.md` file for details on our code style, PR process, and more. (Note: `CONTRIBUTING.md` is a placeholder for now).
+We welcome contributions from the community! Please see our `CONTRIBUTING.md` file for details on our code style and PR process.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for details. (Note: `LICENSE` file is a placeholder for now).
+This project is licensed under the MIT License. See the `LICENSE` file for details.
